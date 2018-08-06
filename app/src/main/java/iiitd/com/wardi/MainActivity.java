@@ -16,6 +16,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     private TextView data;
     private int flag=0, c=0;
+    private SensorManager SM;
+    private Sensor sensor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,33 +28,44 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         data = (TextView) findViewById(iiitd.com.wardi.R.id.text);
         data.setText("See, I told you");
 
-        SensorManager SM = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        Sensor sensor = SM.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        SM = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        sensor = SM.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
 
         if(sensor == null) data.setText("NO SENSOR");
         else SM.registerListener(this, sensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if(sensor != null) SM.unregisterListener(this);
+    }
+
     private void toggle() {
-        if(flag == 1) {
-            data.setText("Don’t you get bored of me");
-        }
-        else {
-            data.setText("See, I told you");
-        }
+        if(flag == 1) data.setText(R.string.you);
+        else data.setText(R.string.me);
     }
 
     @Override
     public void onSensorChanged(SensorEvent sensorEvent) {
 
 //        System.out.println(abs(sensorEvent.values[1]) + " " + flag);
-        if(abs(sensorEvent.values[1]) > 1) {
+        /*if(abs(sensorEvent.values[1]) > 1) {
             if(flag == 0 && c==0) flag=1;
             else if(c==0) flag=0;
             toggle();
             ++c;
         }
-        else c=0;
+        else c=0;*/
+
+        if (sensorEvent.values[1] < -0.6f) data.setText(R.string.you);
+        else if (sensorEvent.values[1] > 0.6f ) data.setText(R.string.me);
     }
 
     @Override
